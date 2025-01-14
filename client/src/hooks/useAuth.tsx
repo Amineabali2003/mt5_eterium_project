@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import API from "../services/api";
 
 interface AuthContextType {
     user: boolean;
     login: (token: string) => void;
     logout: () => void;
+    fetchCurrentUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -14,13 +16,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (token) {
-            setUser(true);
+            fetchCurrentUser();
         }
     }, []);
 
+    const fetchCurrentUser = async () => {
+        try {
+            await API.get("/me", {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            });
+            setUser(true);
+        } catch {
+            setUser(false);
+        }
+    };
+
     const login = (token: string) => {
         localStorage.setItem("token", token);
-        setUser(true);
+        fetchCurrentUser();
     };
 
     const logout = () => {
@@ -29,7 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
+        <AuthContext.Provider value={{ user, login, logout, fetchCurrentUser }}>
             {children}
         </AuthContext.Provider>
     );
