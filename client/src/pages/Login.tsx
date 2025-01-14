@@ -13,19 +13,23 @@ const Login = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError("");
+
         if (!email || !password) {
             setError("Please fill in all fields");
             return;
         }
+
         if (!/\S+@\S+\.\S+/.test(email)) {
             setError("Please enter a valid email address");
             return;
         }
+
         setIsLoading(true);
+
         try {
-            const { data } = await API.post("/auth/login", { email, password });
-            login();
-            localStorage.setItem("token", data.accessToken);
+            const { data } = await API.post("/login", { email, password });
+            login(data.accessToken);
         } catch (error) {
             console.error("Login failed", error);
             setError("Invalid email or password");
