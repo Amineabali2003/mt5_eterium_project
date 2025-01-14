@@ -9,6 +9,7 @@ const Profile = () => {
     const [wallet, setWallet] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchWallet = async () => {
@@ -31,10 +32,11 @@ const Profile = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+        setSuccess(null);
         try {
             await API.put("/profile/update_wallet", { wallet });
             setError(null);
-            // Optionally, show a success message
+            setSuccess("Wallet updated successfully!");
         } catch (error) {
             console.error("Failed to update wallet");
             setError("Failed to update wallet");
@@ -47,6 +49,7 @@ const Profile = () => {
         <div className="max-w-md mx-auto p-4 space-y-4">
             <h1 className="text-2xl font-bold">Profile</h1>
             {error && <p className="text-red-500">{error}</p>}
+            {success && <p className="text-green-500">{success}</p>} {/* Afficher le message de succès */}
             <form onSubmit={handleSubmit} className="space-y-4">
                 <input
                     type="text"
