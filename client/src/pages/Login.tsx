@@ -30,9 +30,14 @@ const Login = () => {
         try {
             const { data } = await API.post("/login", { email, password });
             login(data.accessToken);
-        } catch (error) {
-            console.error("Login failed", error);
-            setError("Invalid email or password");
+        } catch (error: any) {
+            if (error.response) {
+                setError(error.response.data.message || "Invalid email or password");
+            } else if (error.request) {
+                setError("No response from server. Please try again later.");
+            } else {
+                setError("An error occurred. Please try again.");
+            }
         } finally {
             setIsLoading(false);
         }
