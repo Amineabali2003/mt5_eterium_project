@@ -16,4 +16,6 @@ func NewRepository(db *database.DBConnection) Repository {
 type Repository interface {
 	CreateUser(user model.User) (model.User, error)
 	GetUserByEmail(email string) (model.User, error)
+	GetUser(id string) (model.User, error)
+	UpdateUser(id string, user model.User) (model.User, error)
 }

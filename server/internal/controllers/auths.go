@@ -28,5 +28,35 @@ func (r controller) login(c echo.Context) error {
 	c.SetCookie(cookie)
 
 	return c.JSON(http.StatusOK, user)
+}
+
+func (r controller) requestResetPassword(c echo.Context) error {
+	req := model.RequestResetPasswordRequest{}
+
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	err := r.service.RequestResetPassword(req.Email)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, model.RequestResetPasswordResponse{Message: "A password reset link has been sent to your email address. Please check your inbox to proceed with resetting your password."})
+
+}
+
+func (r controller) resetPassword(c echo.Context) error {
+	req := model.ResetPasswordRequest{}
+
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	if err := r.service.ResetPassword(req); err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, "")
 
 }
