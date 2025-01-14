@@ -49,7 +49,7 @@ const Profile = () => {
         <div className="max-w-md mx-auto p-4 space-y-4">
             <h1 className="text-2xl font-bold">Profile</h1>
             {error && <p className="text-red-500">{error}</p>}
-            {success && <p className="text-green-500">{success}</p>} {/* Afficher le message de succès */}
+            {success && <p className="text-green-500">{success}</p>}
             <form onSubmit={handleSubmit} className="space-y-4">
                 <input
                     type="text"
