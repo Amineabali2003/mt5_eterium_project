@@ -1,0 +1,41 @@
+services:
+  server:
+    depends_on:
+      - db
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    hostname: rest-server
+    volumes:
+      - ../cmd:/app/cmd
+      - ../pkg:/app/pkg
+      - ../internal:/app/internal
+    networks:
+      - mynet
+    ports:
+      - "8080:8080"
+    env_file:
+      - ../.env
+    deploy:
+      restart_policy:
+        condition: on-failure
+  db:
+    image: "postgres:alpine"
+    restart: always
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "mydb"
+    networks:
+      - mynet
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+
+networks:
+  mynet:
+    driver: bridge
