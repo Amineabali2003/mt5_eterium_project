@@ -20,3 +20,13 @@ func (r repository) CreateUser(user model.User) (model.User, error) {
 	return user, nil
 
 }
+
+func (r repository) GetUserByEmail(email string) (model.User, error) {
+
+	user := model.User{}
+
+	err := r.db.NewSelect().Model(&user).Where("email = ?", email).Scan(context.TODO())
+
+	return user, err
+
+}
