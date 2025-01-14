@@ -9,16 +9,35 @@ import (
 	"github.com/idir-44/ethereum/internal/model"
 )
 
+type TokenType string
+
+const (
+	TokenTypeAccess        TokenType = "accessToken"
+	TokenTypeResetPassword TokenType = "resetPassword"
+)
+
 type jwtClaims struct {
 	model.User
 	jwt.StandardClaims
 }
 
-func CreateToken(user model.User, key string) (string, error) {
+func CreateToken(user model.User, key string, tokenType TokenType) (string, error) {
+
+	var tokenExpiry time.Duration
+
+	switch tokenType {
+	case TokenTypeAccess:
+		tokenExpiry = 24
+	case TokenTypeResetPassword:
+		tokenExpiry = 2
+	default:
+		tokenExpiry = 1
+	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtClaims{
 		User: user,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
+			ExpiresAt: time.Now().Add(time.Hour * tokenExpiry).Unix(),
 			IssuedAt:  time.Now().Unix(),
 			Id:        uuid.New().String(),
 		},

@@ -18,7 +18,6 @@ func (r repository) CreateUser(user model.User) (model.User, error) {
 	}
 
 	return user, nil
-
 }
 
 func (r repository) GetUserByEmail(email string) (model.User, error) {
@@ -26,6 +25,31 @@ func (r repository) GetUserByEmail(email string) (model.User, error) {
 	user := model.User{}
 
 	err := r.db.NewSelect().Model(&user).Where("email = ?", email).Scan(context.TODO())
+
+	return user, err
+}
+
+func (r repository) GetUser(id string) (model.User, error) {
+
+	user := model.User{}
+
+	err := r.db.NewSelect().Model(&user).Where("id = ?", id).Scan(context.TODO())
+
+	return user, err
+}
+
+func (r repository) UpdateUser(id string, user model.User) (model.User, error) {
+	updateUser := map[string]interface{}{
+		"updated_at": time.Now().UTC(),
+	}
+
+	query := r.db.NewUpdate().Model(&updateUser).TableExpr("users")
+
+	if user.Password != "" {
+		updateUser["password"] = user.Password
+	}
+
+	_, err := query.Where("id = ?", id).Returning("*").Exec(context.TODO())
 
 	return user, err
 

@@ -24,11 +24,71 @@ func (s service) Login(req model.LoginRequest) (model.User, string, error) {
 		return model.User{}, "", fmt.Errorf("jwt secret is not set")
 	}
 
-	token, err := jwttoken.CreateToken(user, key)
+	token, err := jwttoken.CreateToken(user, key, jwttoken.TokenTypeAccess)
 	if err != nil {
 		return model.User{}, "", err
 	}
 
 	return user, token, nil
+
+}
+
+func (s service) RequestResetPassword(email string) error {
+	user, err := s.repository.GetUserByEmail(email)
+	if err != nil {
+		return err
+	}
+
+	key := os.Getenv("jwt_secret")
+	if key == "" {
+		return fmt.Errorf("jwt secret is not set")
+	}
+
+	token, err := jwttoken.CreateToken(user, key, jwttoken.TokenTypeResetPassword)
+	if err != nil {
+		return err
+	}
+
+	// TODO: move front url to env
+	// send email with link
+	fmt.Printf("\nhttp://localhost:3000/reset-password/%s\n", token)
+
+	return nil
+}
+
+func (s service) ResetPassword(req model.ResetPasswordRequest) error {
+
+	key := os.Getenv("jwt_secret")
+	if key == "" {
+		return fmt.Errorf("jwt secret is not set")
+	}
+
+	userClaims, err := jwttoken.ParseToken(req.Token, key)
+	if err != nil {
+		return err
+	}
+
+	pwd, err := utils.HashPassword(req.Password)
+	if err != nil {
+		return nil
+	}
+
+	user, err := s.repository.GetUser(userClaims.ID)
+	if err != nil {
+		return err
+	}
+
+	if user.Email != userClaims.Email {
+		return fmt.Errorf("whatchudoing ?")
+	}
+
+	user.Password = pwd
+
+	_, err = s.repository.UpdateUser(userClaims.ID, user)
+	if err != nil {
+		return err
+	}
+
+	return nil
 
 }
