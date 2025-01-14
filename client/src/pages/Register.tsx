@@ -10,18 +10,40 @@ const Register = () => {
     confirmPassword: "",
   });
   const [errors, setErrors] = useState<string[]>([]);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "password") {
+      if (!isPasswordStrong(value)) {
+        setPasswordError(
+          "Password must be at least 8 characters, include one uppercase, one lowercase, one number, and one special character."
+        );
+      } else {
+        setPasswordError(null);
+      }
+    }
+  };
+
+  const isPasswordStrong = (password: string) => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors([]);
+
     if (formData.password !== formData.confirmPassword) {
       setErrors(["Passwords do not match."]);
+      return;
+    }
+
+    if (passwordError) {
+      setErrors(["Please fix the password complexity issue."]);
       return;
     }
 
@@ -83,6 +105,9 @@ const Register = () => {
             className="w-full p-2 border rounded"
             placeholder="Enter your password"
           />
+          {passwordError && (
+            <div className="text-red-500 mt-1">{passwordError}</div>
+          )}
         </div>
         <div>
           <label htmlFor="confirmPassword" className="block font-medium mb-1">
