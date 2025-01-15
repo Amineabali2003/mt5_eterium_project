@@ -7,6 +7,7 @@ type User struct {
 	Email           string `json:"email"`
 	Password        string `json:"-"`
 	IsEmailVerified bool   `json:"-"`
+	WalletAddress   string `json:"walletAddress"`
 
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
