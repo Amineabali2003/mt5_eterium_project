@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 
 interface WalletResponse {
-    wallet: string;
+    wallet: string | null;
 }
 
 const Profile = () => {
     const [wallet, setWallet] = useState<string>("");
+    const [initialWallet, setInitialWallet] = useState<string>("");
+    const [isWalletModified, setIsWalletModified] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
@@ -18,7 +20,9 @@ const Profile = () => {
             setLoading(true);
             try {
                 const { data } = await API.get<WalletResponse>("/profile/get_wallet");
-                setWallet(data.wallet);
+                const walletValue = data.wallet || ""; // Assurez une valeur par défaut
+                setWallet(walletValue);
+                setInitialWallet(walletValue);
             } catch (error) {
                 console.error("Failed to fetch wallet");
             } finally {
@@ -29,6 +33,11 @@ const Profile = () => {
         fetchWallet();
     }, []);
 
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setWallet(e.target.value);
+        setIsWalletModified(e.target.value !== initialWallet);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -37,6 +46,8 @@ const Profile = () => {
         try {
             await API.put("/profile/update_wallet", { wallet });
             setSuccess("Wallet updated successfully!");
+            setInitialWallet(wallet);
+            setIsWalletModified(false);
             setTimeout(() => {
                 navigate("/dashboard");
             }, 1000);
@@ -57,13 +68,13 @@ const Profile = () => {
                     type="text"
                     placeholder="Wallet"
                     value={wallet}
-                    onChange={(e) => setWallet(e.target.value)}
+                    onChange={handleInputChange}
                     className="w-full p-2 border rounded"
                 />
                 {submitError && <p className="text-red-500">{submitError}</p>}
                 <button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || !isWalletModified}
                     className="w-full bg-blue-500 text-white p-2 rounded disabled:bg-blue-300"
                 >
                     {loading ? "Updating..." : "Update Wallet"}
