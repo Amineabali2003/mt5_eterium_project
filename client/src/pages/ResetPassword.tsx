@@ -57,7 +57,7 @@ const ResetPassword = () => {
         try {
             const { password } = formData;
             const token = window.location.pathname.split("/").pop();
-            await API.post("/auth/reset-password", { password, token });
+            await API.post("/reset-password", { password, token });
             navigate("/login");
         } catch (error: any) {
             console.error("Reset password failed:", error);
