@@ -17,6 +17,7 @@ func init() {
 		email VARCHAR(255) NOT NULL UNIQUE,
 		password VARCHAR(255) NOT NULL,
 		is_email_verified BOOLEAN DEFAULT false,
+		wallet_address TEXT,
 
 		created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 		updated_at TIMESTAMP NOT NULL DEFAULT NOW()
