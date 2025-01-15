@@ -8,7 +8,7 @@ interface WalletResponse {
 const Profile = () => {
     const [wallet, setWallet] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
+    const [submitError, setSubmitError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
     useEffect(() => {
@@ -17,10 +17,8 @@ const Profile = () => {
             try {
                 const { data } = await API.get<WalletResponse>("/profile/get_wallet");
                 setWallet(data.wallet);
-                setError(null);
             } catch (error) {
                 console.error("Failed to fetch wallet");
-                setError("Failed to fetch wallet");
             } finally {
                 setLoading(false);
             }
@@ -32,14 +30,14 @@ const Profile = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+        setSubmitError(null);
         setSuccess(null);
         try {
             await API.put("/profile/update_wallet", { wallet });
-            setError(null);
             setSuccess("Wallet updated successfully!");
         } catch (error) {
             console.error("Failed to update wallet");
-            setError("Failed to update wallet");
+            setSubmitError("Failed to update wallet");
         } finally {
             setLoading(false);
         }
@@ -48,7 +46,6 @@ const Profile = () => {
     return (
         <div className="max-w-md mx-auto p-4 space-y-4">
             <h1 className="text-2xl font-bold">Profile</h1>
-            {error && <p className="text-red-500">{error}</p>}
             {success && <p className="text-green-500">{success}</p>}
             <form onSubmit={handleSubmit} className="space-y-4">
                 <input
@@ -58,6 +55,7 @@ const Profile = () => {
                     onChange={(e) => setWallet(e.target.value)}
                     className="w-full p-2 border rounded"
                 />
+                {submitError && <p className="text-red-500">{submitError}</p>}
                 <button
                     type="submit"
                     disabled={loading}
