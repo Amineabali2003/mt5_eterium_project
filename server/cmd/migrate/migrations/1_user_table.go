@@ -16,6 +16,7 @@ func init() {
 		id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 		email VARCHAR(255) NOT NULL UNIQUE,
 		password VARCHAR(255) NOT NULL,
+		is_email_verified BOOLEAN DEFAULT false,
 
 		created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 		updated_at TIMESTAMP NOT NULL DEFAULT NOW()

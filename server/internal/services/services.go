@@ -18,4 +18,5 @@ type Service interface {
 	Login(req model.LoginRequest) (model.User, string, error)
 	RequestResetPassword(email string) error
 	ResetPassword(req model.ResetPasswordRequest) error
+	VerifyEmail(req model.VerifyEmailRequest) error
 }

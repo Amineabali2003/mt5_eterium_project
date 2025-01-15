@@ -12,8 +12,9 @@ import (
 type TokenType string
 
 const (
-	TokenTypeAccess        TokenType = "accessToken"
-	TokenTypeResetPassword TokenType = "resetPassword"
+	TokenTypeAccess          TokenType = "accessToken"
+	TokenTypeResetPassword   TokenType = "resetPassword"
+	TokenTypeEmailValidation TokenType = "emailValidation"
 )
 
 type jwtClaims struct {
@@ -29,6 +30,8 @@ func CreateToken(user model.User, key string, tokenType TokenType) (string, erro
 	case TokenTypeAccess:
 		tokenExpiry = 24
 	case TokenTypeResetPassword:
+		tokenExpiry = 2
+	case TokenTypeEmailValidation:
 		tokenExpiry = 2
 	default:
 		tokenExpiry = 1
