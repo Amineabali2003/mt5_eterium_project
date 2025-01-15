@@ -44,7 +44,7 @@ const Login = () => {
     };
 
     if (user) {
-        return <Navigate to="/dashboard" />;
+        return <Navigate to="/profile" />;
     }
 
     return (
