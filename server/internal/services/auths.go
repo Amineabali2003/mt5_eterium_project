@@ -15,6 +15,10 @@ func (s service) Login(req model.LoginRequest) (model.User, string, error) {
 		return model.User{}, "", err
 	}
 
+	if !user.IsEmailVerified {
+		return model.User{}, "", fmt.Errorf("Verify email before login")
+	}
+
 	if err := utils.CheckPassword(req.Password, user.Password); err != nil {
 		return model.User{}, "", fmt.Errorf("invalid password: %s", err)
 	}
@@ -91,4 +95,32 @@ func (s service) ResetPassword(req model.ResetPasswordRequest) error {
 
 	return nil
 
+}
+
+func (s service) VerifyEmail(req model.VerifyEmailRequest) error {
+
+	key := os.Getenv("jwt_secret")
+	if key == "" {
+		return fmt.Errorf("jwt secret is not set")
+	}
+
+	userClaims, err := jwttoken.ParseToken(req.Token, key)
+	if err != nil {
+		return err
+	}
+
+	user, err := s.repository.GetUserByEmail(userClaims.Email)
+	if err != nil {
+		return err
+	}
+
+	if user.IsEmailVerified {
+		return fmt.Errorf("Email already verified")
+	}
+
+	user.IsEmailVerified = true
+
+	_, err = s.repository.UpdateUser(user.ID, user)
+
+	return err
 }

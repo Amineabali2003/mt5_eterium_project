@@ -49,6 +49,9 @@ func (r repository) UpdateUser(id string, user model.User) (model.User, error) {
 		updateUser["password"] = user.Password
 	}
 
+	if user.IsEmailVerified {
+		updateUser["is_email_verified"] = user.IsEmailVerified
+	}
 	_, err := query.Where("id = ?", id).Returning("*").Exec(context.TODO())
 
 	return user, err

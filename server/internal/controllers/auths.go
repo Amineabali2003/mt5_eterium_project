@@ -60,3 +60,19 @@ func (r controller) resetPassword(c echo.Context) error {
 	return c.JSON(http.StatusOK, "")
 
 }
+
+func (r controller) verifyEmail(c echo.Context) error {
+	req := model.VerifyEmailRequest{}
+
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	err := r.service.VerifyEmail(req)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, model.VerifyEmailResponse{Message: "Your email has been verified"})
+
+}

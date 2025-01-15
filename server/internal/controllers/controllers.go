@@ -19,6 +19,7 @@ func RegisterHandlers(routerGroup *server.Router, srv services.Service) {
 	routerGroup.POST("/login", c.login)
 	routerGroup.POST("/request-reset-password", c.requestResetPassword)
 	routerGroup.POST("/reset-password", c.resetPassword)
+	routerGroup.POST("/verify-email", c.verifyEmail)
 
 	routerGroup.GET("/me", c.getCurrentUser)
 
