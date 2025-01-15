@@ -19,7 +19,7 @@ const VerifyEmail = () => {
 
             setLoading(true);
             try {
-                const { data } = await API.post<VerifyEmailResponse>("/auth/verify-email", { token });
+                const { data } = await API.post<VerifyEmailResponse>("/verify-email", { token });
                 setMessage(data.message);
             } catch (error: any) {
                 setMessage(error.response?.data?.message || "Email verification failed.");
