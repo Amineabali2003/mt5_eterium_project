@@ -1,16 +1,16 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import API from "services/api";
 
 const Navbar = () => {
     const { user, logout } = useAuth();
+    const navigate = useNavigate();
 
-    const handleLogout = async () => {
-        await API.delete("/auth/logout");
+    const handleLogout = () => {
         logout();
         localStorage.removeItem("token");
-    }
+        navigate("/login");
+    };
 
     return (
         <nav className="bg-gray-800 text-white p-4 flex justify-between">
