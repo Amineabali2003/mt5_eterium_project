@@ -19,4 +19,14 @@ type Service interface {
 	RequestResetPassword(email string) error
 	ResetPassword(req model.ResetPasswordRequest) error
 	VerifyEmail(req model.VerifyEmailRequest) error
+	UpdateWallet(userID, walletAddress string) (model.User, error)
+}
+
+func (s service) UpdateWallet(userID, walletAddress string) (model.User, error) {
+	user, err := s.repository.GetUser(userID)
+	if err != nil {
+		return model.User{}, err
+	}
+	user.WalletAddress = walletAddress
+	return s.repository.UpdateUser(userID, user)
 }

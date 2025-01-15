@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 
 interface WalletResponse {
@@ -10,6 +11,7 @@ const Profile = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchWallet = async () => {
@@ -35,6 +37,9 @@ const Profile = () => {
         try {
             await API.put("/profile/update_wallet", { wallet });
             setSuccess("Wallet updated successfully!");
+            setTimeout(() => {
+                navigate("/dashboard");
+            }, 1000);
         } catch (error) {
             console.error("Failed to update wallet");
             setSubmitError("Failed to update wallet");

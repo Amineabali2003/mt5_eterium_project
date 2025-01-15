@@ -22,5 +22,6 @@ func RegisterHandlers(routerGroup *server.Router, srv services.Service) {
 	routerGroup.POST("/verify-email", c.verifyEmail)
 
 	routerGroup.GET("/me", c.getCurrentUser)
-
+	routerGroup.GET("/profile/get_wallet", c.getWallet)
+	routerGroup.PUT("/profile/update_wallet", c.updateWallet)
 }
