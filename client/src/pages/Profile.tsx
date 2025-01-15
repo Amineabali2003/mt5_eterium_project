@@ -20,7 +20,7 @@ const Profile = () => {
             setLoading(true);
             try {
                 const { data } = await API.get<WalletResponse>("/profile/get_wallet");
-                const walletValue = data.wallet || ""; // Assurez une valeur par défaut
+                const walletValue = data.wallet || ""; 
                 setWallet(walletValue);
                 setInitialWallet(walletValue);
             } catch (error) {
