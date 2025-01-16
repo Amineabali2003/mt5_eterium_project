@@ -37,6 +37,30 @@ func (s service) Login(req model.LoginRequest) (model.User, string, error) {
 
 }
 
+const htmlContentReset = `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .btn {
+            display: inline-block;
+            background-color: #FF5733;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Reset Your Password</h1>
+    <p>We received a request to reset your password. If you made this request, click the button below to reset your password:</p>
+    <a href="http://localhost:3000/reset-password/%s" class="btn">Reset Password</a>
+    <p>If you did not request a password reset, you can safely ignore this email.</p>
+</body>
+</html>
+`
+
 func (s service) RequestResetPassword(email string) error {
 	user, err := s.repository.GetUserByEmail(email)
 	if err != nil {
@@ -54,8 +78,12 @@ func (s service) RequestResetPassword(email string) error {
 	}
 
 	// TODO: move front url to env
-	// send email with link
 	fmt.Printf("\nhttp://localhost:3000/reset-password/%s\n", token)
+
+	emailErr := s.SendEmail([]string{user.Email}, fmt.Sprintf(htmlContent, token), "Subject: Reset Your Password\n")
+	if emailErr != nil {
+		fmt.Println(emailErr)
+	}
 
 	return nil
 }
