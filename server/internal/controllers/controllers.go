@@ -21,7 +21,10 @@ func RegisterHandlers(routerGroup *server.Router, srv services.Service) {
 	routerGroup.POST("/reset-password", c.resetPassword)
 	routerGroup.POST("/verify-email", c.verifyEmail)
 
-	routerGroup.GET("/me", c.getCurrentUser)
-	routerGroup.GET("/profile/get_wallet", c.getWallet)
-	routerGroup.PUT("/profile/update_wallet", c.updateWallet)
+	// protected routes
+	routerGroup.GET("/me", c.getCurrentUser, middlewares.IsAuthenticated)
+	routerGroup.GET("/profile/get_wallet", c.getWallet, middlewares.IsAuthenticated)
+	routerGroup.PUT("/profile/update_wallet", c.updateWallet, middlewares.IsAuthenticated)
+	routerGroup.GET("/wallet/get_data", c.getWalletData, middlewares.IsAuthenticated)
+	routerGroup.GET("/wallet/get_transactions", c.getWalletTransactions, middlewares.IsAuthenticated)
 }
