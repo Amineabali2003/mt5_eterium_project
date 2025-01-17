@@ -15,7 +15,8 @@ func NewService(repo repositories.Repository) Service {
 
 type Service interface {
 	CreateUser(req model.CreateUserReqesut) (model.User, error)
-	Login(req model.LoginRequest) (model.User, string, error)
+	Login(req model.LoginRequest) (model.User, string, string, error)
+	VerifyRefreshToken(user model.User, refreshToken string) (string, string, error)
 	RequestResetPassword(email string) error
 	ResetPassword(req model.ResetPasswordRequest) error
 	VerifyEmail(req model.VerifyEmailRequest) error

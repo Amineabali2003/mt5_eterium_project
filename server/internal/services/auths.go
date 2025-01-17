@@ -3,39 +3,12 @@ package services
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/idir-44/ethereum/internal/jwttoken"
 	"github.com/idir-44/ethereum/internal/model"
 	"github.com/idir-44/ethereum/pkg/utils"
 )
-
-func (s service) Login(req model.LoginRequest) (model.User, string, error) {
-	user, err := s.repository.GetUserByEmail(req.Email)
-	if err != nil {
-		return model.User{}, "", err
-	}
-
-	if !user.IsEmailVerified {
-		return model.User{}, "", fmt.Errorf("Verify email before login")
-	}
-
-	if err := utils.CheckPassword(req.Password, user.Password); err != nil {
-		return model.User{}, "", fmt.Errorf("invalid password: %s", err)
-	}
-
-	key := os.Getenv("jwt_secret")
-	if key == "" {
-		return model.User{}, "", fmt.Errorf("jwt secret is not set")
-	}
-
-	token, err := jwttoken.CreateToken(user, key, jwttoken.TokenTypeAccess)
-	if err != nil {
-		return model.User{}, "", err
-	}
-
-	return user, token, nil
-
-}
 
 const htmlContentReset = `
 <!DOCTYPE html>
@@ -60,6 +33,77 @@ const htmlContentReset = `
 </body>
 </html>
 `
+
+func (s service) Login(req model.LoginRequest) (model.User, string, string, error) {
+	user, err := s.repository.GetUserByEmail(req.Email)
+	if err != nil {
+		return model.User{}, "", "", err
+	}
+
+	if !user.IsEmailVerified {
+		return model.User{}, "", "", fmt.Errorf("Verify email before login")
+	}
+
+	if err := utils.CheckPassword(req.Password, user.Password); err != nil {
+		return model.User{}, "", "", fmt.Errorf("invalid password: %s", err)
+	}
+
+	key := os.Getenv("jwt_secret")
+	if key == "" {
+		return model.User{}, "", "", fmt.Errorf("jwt secret is not set")
+	}
+
+	token, err := jwttoken.CreateToken(user, key, jwttoken.TokenTypeAccess)
+	if err != nil {
+		return model.User{}, "", "", err
+	}
+
+	refreshToken, err := jwttoken.CreateToken(user, key, jwttoken.TokenTypeRefresh)
+	if err != nil {
+		return model.User{}, "", "", err
+	}
+
+	_, err = s.repository.CreateRefreshToken(user, refreshToken)
+	if err != nil {
+		return model.User{}, "", "", err
+	}
+
+	return user, token, refreshToken, nil
+}
+
+func (s service) VerifyRefreshToken(user model.User, refreshToken string) (string, string, error) {
+	token, err := s.repository.GetRefreshToken(refreshToken)
+	if err != nil {
+		return "", "", err
+	}
+
+	if token.Revoked || time.Now().After(token.Expires_at) {
+		return "", "", fmt.Errorf("invalid refreshToken")
+	}
+
+	key := os.Getenv("jwt_secret")
+	if key == "" {
+		return "", "", fmt.Errorf("jwt secret is not set")
+	}
+
+	accessToken, err := jwttoken.CreateToken(user, key, jwttoken.TokenTypeAccess)
+	if err != nil {
+		return "", "", err
+	}
+
+	refresh, err := jwttoken.CreateToken(user, key, jwttoken.TokenTypeRefresh)
+	if err != nil {
+		return "", "", err
+	}
+
+	_, err = s.repository.CreateRefreshToken(user, refreshToken)
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessToken, refresh, nil
+
+}
 
 func (s service) RequestResetPassword(email string) error {
 	user, err := s.repository.GetUserByEmail(email)

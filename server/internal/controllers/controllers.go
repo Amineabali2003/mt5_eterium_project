@@ -20,6 +20,7 @@ func RegisterHandlers(routerGroup *server.Router, srv services.Service) {
 	routerGroup.POST("/request-reset-password", c.requestResetPassword)
 	routerGroup.POST("/reset-password", c.resetPassword)
 	routerGroup.POST("/verify-email", c.verifyEmail)
+	routerGroup.POST("/refresh", c.verifyRefreshToken)
 
 	// protected routes
 	routerGroup.GET("/me", c.getCurrentUser, middlewares.IsAuthenticated)

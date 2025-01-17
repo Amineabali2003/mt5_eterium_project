@@ -1,9 +1,12 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 	"time"
 
+	"github.com/idir-44/ethereum/internal/jwttoken"
 	"github.com/idir-44/ethereum/internal/model"
 	"github.com/labstack/echo/v4"
 )
@@ -15,7 +18,7 @@ func (r controller) login(c echo.Context) error {
 		return err
 	}
 
-	user, token, err := r.service.Login(req)
+	user, token, refreshToken, err := r.service.Login(req)
 	if err != nil {
 		return err
 	}
@@ -26,6 +29,50 @@ func (r controller) login(c echo.Context) error {
 	cookie.Expires = time.Now().Add(24 * time.Hour)
 	cookie.HttpOnly = true
 	c.SetCookie(cookie)
+
+	refreshCookie := new(http.Cookie)
+	refreshCookie.Name = "refreshToken"
+	refreshCookie.Value = refreshToken
+	refreshCookie.Expires = time.Now().Add(72 * time.Hour)
+	refreshCookie.HttpOnly = true
+	c.SetCookie(refreshCookie)
+
+	return c.JSON(http.StatusOK, user)
+}
+
+func (r controller) verifyRefreshToken(c echo.Context) error {
+	cookies, err := c.Cookie("refreshToken")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err)
+	}
+
+	key := os.Getenv("jwt_secret")
+	if key == "" {
+		return fmt.Errorf("jwt secret is not set")
+	}
+	user, err := jwttoken.ParseToken(cookies.Value, key)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err)
+	}
+
+	accessToken, refreshToken, err := r.service.VerifyRefreshToken(user, cookies.Value)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err)
+	}
+
+	cookie := new(http.Cookie)
+	cookie.Name = "token"
+	cookie.Value = accessToken
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+	cookie.HttpOnly = true
+	c.SetCookie(cookie)
+
+	refreshCookie := new(http.Cookie)
+	refreshCookie.Name = "refreshToken"
+	refreshCookie.Value = refreshToken
+	refreshCookie.Expires = time.Now().Add(72 * time.Hour)
+	refreshCookie.HttpOnly = true
+	c.SetCookie(refreshCookie)
 
 	return c.JSON(http.StatusOK, user)
 }

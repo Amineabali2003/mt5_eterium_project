@@ -34,7 +34,7 @@ func AddCurentUser(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		user, err := jwttoken.ParseToken(cookies.Value, key)
 		if err != nil {
-			return err
+			return echo.NewHTTPError(http.StatusUnauthorized, err)
 		}
 
 		c.Set("user", user)

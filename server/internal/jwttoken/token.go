@@ -12,6 +12,7 @@ import (
 type TokenType string
 
 const (
+	TokenTypeRefresh         TokenType = "refreshToken"
 	TokenTypeAccess          TokenType = "accessToken"
 	TokenTypeResetPassword   TokenType = "resetPassword"
 	TokenTypeEmailValidation TokenType = "emailValidation"
@@ -27,8 +28,10 @@ func CreateToken(user model.User, key string, tokenType TokenType) (string, erro
 	var tokenExpiry time.Duration
 
 	switch tokenType {
+	case TokenTypeRefresh:
+		tokenExpiry = 72
 	case TokenTypeAccess:
-		tokenExpiry = 24
+		tokenExpiry = 1
 	case TokenTypeResetPassword:
 		tokenExpiry = 2
 	case TokenTypeEmailValidation:
