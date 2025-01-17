@@ -18,4 +18,6 @@ type Repository interface {
 	GetUserByEmail(email string) (model.User, error)
 	GetUser(id string) (model.User, error)
 	UpdateUser(id string, user model.User) (model.User, error)
+	CreateRefreshToken(user model.User, refresh string) (model.User, error)
+	GetRefreshToken(refresh string) (model.RefreshToken, error)
 }
